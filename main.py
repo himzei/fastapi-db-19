@@ -32,6 +32,7 @@ def get_db():
 
 app = FastAPI()
 
+# 회원가입
 @app.post("/users")
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     new_user = User(username=user.username, email=user.email)
@@ -43,6 +44,30 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
         "id": new_user.id, 
         "username": new_user.username,
         "email": new_user.email
+    }
+
+# 가입한 정보 불러오기(전체조회)
+@app.get("/users")
+def read_users(db: Session=Depends(get_db)):
+    users = db.query(User).all()
+    return [
+        {
+            "id": user.id, 
+            "username": user.username, 
+            "email": user.email
+        } for user in users
+    ]
+
+# 하나 조회
+@app.get("/users/{user_id}")
+def read_user(user_id: int, db: Session=Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None: 
+        return HTTPException(status_code=404, deatal="사용자가 없습니다.")
+    return {
+        "id": user.id, 
+        "username" : user.username, 
+        "email": user.email
     }
 
 @app.get("/")
