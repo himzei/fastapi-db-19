@@ -79,6 +79,7 @@ def update_user(user_id: int, data: UserCreate,  db: Session=Depends(get_db)):
 
     user.username = data.username
     user.email = data.email
+    
     db.commit()
     db.refresh(user)
     
