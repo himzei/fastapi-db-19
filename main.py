@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import declarative_base, Session
 from pydantic import BaseModel
 
-DATABASE_URL = "postgresql://postgres.lndxrlzwtkdzdclrhgyd:j4rzGgnP5EG6h9yb@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres"
+DATABASE_URL = "postgresql://postgres.lndxrlzwtkdzdclrhgyd:bR8apExVnkfJ2caq@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres"
 
 engine = create_engine(DATABASE_URL)
 Base = declarative_base()
@@ -79,7 +79,7 @@ def update_user(user_id: int, data: UserCreate,  db: Session=Depends(get_db)):
 
     user.username = data.username
     user.email = data.email
-    
+
     db.commit()
     db.refresh(user)
     
@@ -88,9 +88,21 @@ def update_user(user_id: int, data: UserCreate,  db: Session=Depends(get_db)):
         "username": user.username, 
         "email": user.email
     }
-    
 
-    
+@app.delete("/users/{user_id}")
+def delete_user(user_id:int,  db: Session=Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        return HTTPException(status_code=404, deatal="사용자가 없습니다.")
+
+    db.delete(user)
+    db.commit()
+
+    return {
+        "message": "삭제완료"
+    }
+
+ 
 @app.get("/")
 def read_home():
     return {
